@@ -4,7 +4,7 @@ package routine
 
 import (
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"os"
 	"path"

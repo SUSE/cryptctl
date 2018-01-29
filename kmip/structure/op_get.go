@@ -5,7 +5,7 @@ package structure
 import (
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/kmip/ttlv"
+	"github.com/SUSE/cryptctl/kmip/ttlv"
 )
 
 // KMIP request message 420078

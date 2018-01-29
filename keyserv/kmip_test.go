@@ -4,7 +4,7 @@ package keyserv
 
 import (
 	"encoding/hex"
-	"github.com/HouzuoGuo/cryptctl/keydb"
+	"github.com/SUSE/cryptctl/keydb"
 	"io/ioutil"
 	"os"
 	"path"

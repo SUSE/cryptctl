@@ -5,7 +5,7 @@ package keyserv
 import (
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/sys"
 	"net/smtp"
 	"strconv"
 	"strings"

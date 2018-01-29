@@ -5,8 +5,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/command"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/command"
+	"github.com/SUSE/cryptctl/sys"
 	"os"
 	"os/signal"
 	"runtime"
