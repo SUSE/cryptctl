@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"net"
 	"net/rpc"

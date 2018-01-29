@@ -5,7 +5,7 @@ package fs
 import (
 	"bytes"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/sys"
 	"os"
 	"path"
 	"strconv"

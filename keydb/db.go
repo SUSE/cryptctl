@@ -5,7 +5,7 @@ package keydb
 import (
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/fs"
+	"github.com/SUSE/cryptctl/fs"
 	"io/ioutil"
 	"log"
 	"os"

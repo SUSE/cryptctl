@@ -4,7 +4,7 @@ package structure
 
 import (
 	"encoding/hex"
-	"github.com/HouzuoGuo/cryptctl/kmip/ttlv"
+	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"log"
 )
 

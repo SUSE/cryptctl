@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/kmip/ttlv"
+	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"reflect"
 )
 

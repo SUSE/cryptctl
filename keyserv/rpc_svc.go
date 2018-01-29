@@ -11,9 +11,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/fs"
-	"github.com/HouzuoGuo/cryptctl/keydb"
-	"github.com/HouzuoGuo/cryptctl/sys"
+	"github.com/SUSE/cryptctl/fs"
+	"github.com/SUSE/cryptctl/keydb"
+	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"log"
 	"net"
@@ -58,7 +58,7 @@ const (
 	DomainSocketFile = "/var/run/cryptctl-domainsocket" // DomainSocketFile is the file name of unix domain socket server
 )
 
-var PkgInGopath = path.Join(path.Join(os.Getenv("GOPATH"), "/src/github.com/HouzuoGuo/cryptctl")) // this package in gopath
+var PkgInGopath = path.Join(path.Join(os.Getenv("GOPATH"), "/src/github.com/SUSE/cryptctl")) // this package in gopath
 
 func GetDefaultKeySvcConf() *sys.Sysconfig {
 	defConf, err := sys.ParseSysconfigFile(path.Join(PkgInGopath, "ospackage/etc/sysconfig/cryptctl-server"), false)

@@ -5,7 +5,7 @@ package structure
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/HouzuoGuo/cryptctl/kmip/ttlv"
+	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"reflect"
 	"testing"
 )
