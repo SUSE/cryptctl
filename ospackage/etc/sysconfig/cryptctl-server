@@ -173,4 +173,4 @@ KMIP_TLS_DO_VERIFY="yes"
 #
 # For security reason it is not recommended to allow hashed password authentication.
 # For compatibility reasen this can be set yes until all clients are updated
-HASH_AUTH="no"
+ALLOW_HASH_AUTH="no"
