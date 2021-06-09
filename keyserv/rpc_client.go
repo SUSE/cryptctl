@@ -250,7 +250,7 @@ func StartTestServer(tb testing.TB) (*CryptClient, *CryptServer, func(testing.TB
 	// Server should start within about 2 seconds
 	serverReady := false
 	for i := 0; i < 20; i++ {
-		if err := client.Ping(PingRequest{Password: HashPassword(salt, TEST_RPC_PASS)}); err == nil {
+		if err := client.Ping(PingRequest{PlainPassword: TEST_RPC_PASS}); err == nil {
 			serverReady = true
 			break
 		}
@@ -265,7 +265,7 @@ func StartTestServer(tb testing.TB) (*CryptClient, *CryptServer, func(testing.TB
 			t.Fatal(err)
 			return
 		}
-		if err := client.Ping(PingRequest{Password: HashPassword(salt, TEST_RPC_PASS)}); err == nil {
+		if err := client.Ping(PingRequest{PlainPassword: TEST_RPC_PASS}); err == nil {
 			t.Fatal("server did not shutdown")
 			return
 		}
