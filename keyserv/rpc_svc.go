@@ -427,6 +427,8 @@ func (rpcConn *CryptServiceConn) Ping(req PingRequest, _ *DummyAttr) error {
 		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
 			return err
 		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	if err := rpcConn.Svc.CheckInitialSetup(); err != nil {
 		return fmt.Errorf("Ping: the server is not ready to manage encryption keys - %v", err)
