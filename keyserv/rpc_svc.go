@@ -367,7 +367,7 @@ func (srv *CryptServer) ValidatePlainPassword(password string) error {
                 return err
         }
         if subtle.ConstantTimeCompare(pass[:], srv.Config.PasswordHash[:]) != 1 {
-                return errors.New("ValidatePassword: password is incorrect")
+                return errors.New("ValidatePlainPassword: password is incorrect")
         }
         return nil
 }
@@ -466,9 +466,18 @@ type CreateKeyResp struct {
 
 // Save a new key record.
 func (rpcConn *CryptServiceConn) CreateKey(req CreateKeyReq, resp *CreateKeyResp) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
-	} else if err := req.Validate(); err != nil {
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
+	}
+	if err := req.Validate(); err != nil {
 		return err
 	}
 	/*
@@ -633,8 +642,16 @@ type ManualRetrieveKeyResp struct {
 
 // Retrieve encryption keys using a password. All requested keys will be granted regardless of MaxActive restriction.
 func (rpcConn *CryptServiceConn) ManualRetrieveKey(req ManualRetrieveKeyReq, resp *ManualRetrieveKeyResp) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	// Retrieve the keys and write down who retrieved it
 	requester := keydb.AliveMessage{
@@ -686,8 +703,16 @@ type EraseKeyReq struct {
 }
 
 func (rpcConn *CryptServiceConn) EraseKey(req EraseKeyReq, _ *DummyAttr) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	rec, found := rpcConn.Svc.KeyDB.GetByUUID(req.UUID)
 	if !found {
@@ -731,8 +756,16 @@ type ReloadRecordReq struct {
 
 // ReloadRecord causes exactly one database record to be reloaded from disk.
 func (rpcConn *CryptServiceConn) ReloadRecord(req ReloadRecordReq, _ *DummyAttr) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	if err := rpcConn.Svc.KeyDB.ReloadRecord(req.UUID); err != nil {
 		return err
