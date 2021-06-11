@@ -64,11 +64,7 @@ func ConnectToKeyServer(caFile, certFile, keyFile, keyServer string) (client *ke
 	}
 	password = sys.InputPassword(true, "", "Enter key server's password (no echo)")
 	fmt.Fprintf(os.Stderr, "Establishing connection to %s on port %d...\n", serverAddr, port)
-	salt, err := client.GetSalt()
-	if err != nil {
-		return nil, "", err
-	}
-	if err := client.Ping(keyserv.PingRequest{Password: keyserv.HashPassword(salt, password)}); err != nil {
+	if err := client.Ping(keyserv.PingRequest{PlainPassword: password}); err != nil {
 		return nil, "", err
 	}
 	return
@@ -516,11 +512,7 @@ func SendCommand() error {
 	}
 	password := sys.InputPassword(true, "", "Enter key server's password (no echo)")
 	// Test the connection and password
-	salt, err := client.GetSalt()
-	if err != nil {
-		return err
-	}
-	if err := client.Ping(keyserv.PingRequest{Password: keyserv.HashPassword(salt, password)}); err != nil {
+	if err := client.Ping(keyserv.PingRequest{PlainPassword: password}); err != nil {
 		return err
 	}
 	// Interactively gather pending command details
@@ -555,7 +547,7 @@ func SendCommand() error {
 		return fmt.Errorf("Failed to update database record - %v", err)
 	}
 	// Ask server to reload the record from disk
-	client.ReloadRecord(keyserv.ReloadRecordReq{Password: keyserv.HashPassword(salt, password), UUID: uuid})
+	client.ReloadRecord(keyserv.ReloadRecordReq{PlainPassword: password, UUID: uuid})
 	fmt.Printf("All done! Computer %s will be informed of the command when it comes online and polls from this server.\n", ip)
 	return nil
 }
@@ -569,11 +561,7 @@ func ClearPendingCommands() error {
 	}
 	password := sys.InputPassword(true, "", "Enter key server's password (no echo)")
 	// Test the connection and password
-	salt, err := client.GetSalt()
-	if err != nil {
-		return err
-	}
-	if err := client.Ping(keyserv.PingRequest{Password: keyserv.HashPassword(salt, password)}); err != nil {
+	if err := client.Ping(keyserv.PingRequest{PlainPassword: password}); err != nil {
 		return err
 	}
 	uuid := sys.Input(true, "", "What is the UUID of disk to be cleared of pending commands?")
@@ -587,7 +575,7 @@ func ClearPendingCommands() error {
 		return fmt.Errorf("Failed to update database record - %v", err)
 	}
 	// Ask server to reload the record from disk
-	client.ReloadRecord(keyserv.ReloadRecordReq{Password: keyserv.HashPassword(salt, password), UUID: uuid})
+	client.ReloadRecord(keyserv.ReloadRecordReq{PlainPassword: password, UUID: uuid})
 	fmt.Printf("All of %s's pending commands have been successfully cleared.\n", uuid)
 	return nil
 }

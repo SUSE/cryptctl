@@ -36,15 +36,10 @@ func TestCreateKeyReq_Validate(t *testing.T) {
 func TestRPCCalls(t *testing.T) {
 	client, _, tearDown := StartTestServer(t)
 	defer tearDown(t)
-	// Retrieve server's password salt
-	salt, err := client.GetSalt()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := client.Ping(PingRequest{Password: HashPassword(salt, "wrong password")}); err == nil {
+	if err := client.Ping(PingRequest{PlainPassword: "wrong password")); err == nil {
 		t.Fatal("did not error")
 	}
-	if err := client.Ping(PingRequest{Password: HashPassword(salt, TEST_RPC_PASS)}); err != nil {
+	if err := client.Ping(PingRequest{PlainPassword: TEST_RPC_PASS}); err != nil {
 		t.Fatal(err)
 	}
 	// Construct a client via sysconfig
@@ -56,12 +51,12 @@ func TestRPCCalls(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := scClient.Ping(PingRequest{Password: HashPassword(salt, TEST_RPC_PASS)}); err != nil {
+	if err := scClient.Ping(PingRequest{PlainPassword: TEST_RPC_PASS}); err != nil {
 		t.Fatal(err)
 	}
 	// Refuse to save a key if password is incorrect
 	createResp, err := client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, "wrong password"),
+		PlainPassword:    "wrong password",
 		Hostname:         "localhost",
 		UUID:             "aaa",
 		MountPoint:       "/a",
@@ -75,7 +70,7 @@ func TestRPCCalls(t *testing.T) {
 	}
 	// Save two good keys
 	createResp, err = client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "aaa",
 		MountPoint:       "/a",
@@ -88,7 +83,7 @@ func TestRPCCalls(t *testing.T) {
 		t.Fatal(err)
 	}
 	createResp, err = client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "bbb",
 		MountPoint:       "/b",
@@ -158,14 +153,14 @@ func TestRPCCalls(t *testing.T) {
 
 	// Forcibly retrieve both keys and verify
 	if _, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-		Password: HashPassword(salt, "wrong password"),
+		PlainPassword:    "wrong password",
 		UUIDs:    []string{"aaa"},
 		Hostname: "localhost",
 	}); err == nil {
 		t.Fatal("did not error")
 	}
 	manResp, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-		Password: HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		UUIDs:    []string{"aaa", "bbb", "does_not_exist"},
 		Hostname: "localhost",
 	})
@@ -191,7 +186,7 @@ func TestRPCCalls(t *testing.T) {
 
 	// Delete key
 	if err := client.EraseKey(EraseKeyReq{
-		Password: HashPassword(salt, "wrong password"),
+		PlainPassword:    "wrong password",
 		Hostname: "localhost",
 		UUID:     "aaa",
 	}); err == nil {
@@ -199,14 +194,14 @@ func TestRPCCalls(t *testing.T) {
 	}
 	// Erasing a non-existent key should not result in an error
 	if err := client.EraseKey(EraseKeyReq{
-		Password: HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname: "localhost",
 		UUID:     "doesnotexist",
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := client.EraseKey(EraseKeyReq{
-		Password: HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname: "localhost",
 		UUID:     "aaa",
 	}); err != nil {
@@ -214,7 +209,7 @@ func TestRPCCalls(t *testing.T) {
 	}
 	// Erasing a non-existent key should not result in an error
 	if err := client.EraseKey(EraseKeyReq{
-		Password: HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname: "localhost",
 		UUID:     "aaa",
 	}); err != nil {
@@ -227,12 +222,8 @@ func TestPendingCommands(t *testing.T) {
 	client, server, tearDown := StartTestServer(t)
 	defer tearDown(t)
 	// Create a key that will host pending commands
-	salt, err := client.GetSalt()
-	if err != nil {
-		t.Fatal(err)
-	}
 	client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "a-a-a-a",
 		MountPoint:       "/",

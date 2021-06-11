@@ -186,12 +186,8 @@ func EncryptFS(progressOut io.Writer, client *keyserv.CryptClient,
 		return "", fmt.Errorf(MSG_E_SRC_DIR_MOUNT_NOT_FOUND, srcDir)
 	}
 	cryptDevUUID := MakeUUID()
-	salt, err := client.GetSalt()
-	if err != nil {
-		return "", fmt.Errorf(MSG_E_RPC_KEY_CREATE, err)
-	}
 	encryptionKeyResp, err := client.CreateKey(keyserv.CreateKeyReq{
-		Password:         keyserv.HashPassword(salt, password),
+		PlainPassword:    password,
 		UUID:             cryptDevUUID,
 		MountPoint:       srcDir,
 		MountOptions:     srcDirMount.Options,

@@ -21,7 +21,7 @@ func BenchmarkSaveKey(b *testing.B) {
 	// The benchmark will run all RPC operations consecutively
 	for i := 0; i < b.N; i++ {
 		if _, err := client.CreateKey(CreateKeyReq{
-			Password:         HashPassword(salt, TEST_RPC_PASS),
+			PlainPassword:    TEST_RPC_PASS,
 			Hostname:         "localhost",
 			UUID:             "aaa",
 			MountPoint:       "/a",
@@ -49,7 +49,7 @@ func BenchmarkAutoRetrieveKey(b *testing.B) {
 	defer runtime.GOMAXPROCS(oldMaxprocs)
 	runtime.GOMAXPROCS(1)
 	if _, err := client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "aaa",
 		MountPoint:       "/a",
@@ -86,7 +86,7 @@ func BenchmarkManualRetrieveKey(b *testing.B) {
 	defer runtime.GOMAXPROCS(oldMaxprocs)
 	runtime.GOMAXPROCS(1)
 	if _, err := client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "aaa",
 		MountPoint:       "/a",
@@ -101,7 +101,7 @@ func BenchmarkManualRetrieveKey(b *testing.B) {
 	// The benchmark will run all RPC operations consecutively
 	for i := 0; i < b.N; i++ {
 		if resp, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-			Password: HashPassword(salt, TEST_RPC_PASS),
+			PlainPassword:    TEST_RPC_PASS,
 			UUIDs:    []string{"aaa"},
 			Hostname: "localhost",
 		}); err != nil || len(resp.Granted) != 1 {
@@ -124,7 +124,7 @@ func BenchmarkReportAlive(b *testing.B) {
 	defer runtime.GOMAXPROCS(oldMaxprocs)
 	runtime.GOMAXPROCS(1)
 	if _, err := client.CreateKey(CreateKeyReq{
-		Password:         HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		Hostname:         "localhost",
 		UUID:             "aaa",
 		MountPoint:       "/a",
@@ -137,7 +137,7 @@ func BenchmarkReportAlive(b *testing.B) {
 	}
 	// Retrieve the key so that this computer becomes eligible to send alive messages
 	if resp, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-		Password: HashPassword(salt, TEST_RPC_PASS),
+		PlainPassword:    TEST_RPC_PASS,
 		UUIDs:    []string{"aaa"},
 		Hostname: "localhost",
 	}); err != nil || len(resp.Granted) != 1 {

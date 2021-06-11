@@ -167,3 +167,10 @@ KMIP_TLS_CERT_KEY_PEM=""
 # If set to "no", cryptctl server will reduce its security measures by not verifying KMIP server's TLS certificate.
 # Remember to restart cryptctl-server.service after changing any value of this file.
 KMIP_TLS_DO_VERIFY="yes"
+
+## Type:    boolean
+## Default: "no"
+#
+# For security reason it is not recommended to allow hashed password authentication.
+# For compatibility reasen this can be set yes until all clients are updated
+ALLOW_HASH_AUTH="no"

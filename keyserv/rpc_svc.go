@@ -44,6 +44,7 @@ const (
 	SRV_CONF_MAIL_CREATION_TEXT  = "EMAIL_KEY_CREATION_GREETING"
 	SRV_CONF_MAIL_RETRIEVAL_SUBJ = "EMAIL_KEY_RETRIEVAL_SUBJECT"
 	SRV_CONF_MAIL_RETRIEVAL_TEXT = "EMAIL_KEY_RETRIEVAL_GREETING"
+	SRV_CONF_ALLOW_HASH_AUTH     = "ALLOW_HASH_AUTH"
 
 	SRV_CONF_KMIP_SERVER_ADDRS    = "KMIP_SERVER_ADDRESSES"
 	SRV_CONF_KMIP_SERVER_USER     = "KMIP_SERVER_USER"
@@ -105,6 +106,7 @@ type CryptServiceConfig struct {
 	KeyCreationGreeting  string              // greeting of the notification email sent by key creation request
 	KeyRetrievalSubject  string              // subject of the notification email sent by key retrieval request
 	KeyRetrievalGreeting string              // greeting of the notification email sent by key retrieval request
+	AllowHashAuth        bool                // Enable hashed password authentication
 	KMIPAddresses        []string            // optional KMIP server addresses (server1:port1 server2:port2 ...)
 	KMIPUser             string              // optional KMIP service access user
 	KMIPPass             string              // optional KMIP service access password
@@ -156,6 +158,7 @@ func (conf *CryptServiceConfig) ReadFromSysconfig(sysconf *sys.Sysconfig) error 
 	conf.KeyCreationGreeting = sysconf.GetString(SRV_CONF_MAIL_CREATION_TEXT, "The key server now has encryption key for the following file system:")
 	conf.KeyRetrievalSubject = sysconf.GetString(SRV_CONF_MAIL_RETRIEVAL_SUBJ, "An encrypted file system has been accessed")
 	conf.KeyRetrievalGreeting = sysconf.GetString(SRV_CONF_MAIL_RETRIEVAL_TEXT, "The key server has sent the following encryption key to allow access to its file systems:")
+	conf.AllowHashAuth = sysconf.GetBool(SRV_CONF_ALLOW_HASH_AUTH, true)
 
 	conf.KMIPAddresses = sysconf.GetStringArray(SRV_CONF_KMIP_SERVER_ADDRS, []string{})
 	conf.KMIPUser = sysconf.GetString(SRV_CONF_KMIP_SERVER_USER, "")
@@ -356,6 +359,19 @@ func (srv *CryptServer) CheckInitialSetup() error {
 	return nil
 }
 
+func (srv *CryptServer) ValidatePlainPassword(password string) error {
+	var salt PasswordSalt
+	copy(salt[:], srv.Config.PasswordSalt[:])
+	pass := HashPassword(salt, password)
+	if err := srv.CheckInitialSetup(); err != nil {
+                return err
+        }
+        if subtle.ConstantTimeCompare(pass[:], srv.Config.PasswordHash[:]) != 1 {
+                return errors.New("ValidatePlainPassword: password is incorrect")
+        }
+        return nil
+}
+
 // Validate a password against stored hash.
 func (srv *CryptServer) ValidatePassword(pass HashedPassword) error {
 	// Fail straight away if server setup is missing
@@ -397,13 +413,22 @@ var RPCObjNameFmt = reflect.TypeOf(CryptServiceConn{}).Name() + ".%s" // for con
 
 // A request to ping server and test its readiness for key operations.
 type PingRequest struct {
+	PlainPassword string    // access is granted only after the correct password is given
 	Password HashedPassword // access is only granted after correct password is given
 }
 
 // If the server is ready to manage encryption keys, return nothing successfully. Return an error if otherwise.
 func (rpcConn *CryptServiceConn) Ping(req PingRequest, _ *DummyAttr) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	if err := rpcConn.Svc.CheckInitialSetup(); err != nil {
 		return fmt.Errorf("Ping: the server is not ready to manage encryption keys - %v", err)
@@ -415,6 +440,7 @@ type DummyAttr bool // dummy type for a placeholder receiver in an RPC function
 
 // A request to create an encryption key on server.
 type CreateKeyReq struct {
+	PlainPassword    string         // access is granted only after the correct password is given
 	Password         HashedPassword // access is granted only after the correct password is given
 	Hostname         string         // computer host name (for logging only)
 	UUID             string         // file system uuid
@@ -442,9 +468,18 @@ type CreateKeyResp struct {
 
 // Save a new key record.
 func (rpcConn *CryptServiceConn) CreateKey(req CreateKeyReq, resp *CreateKeyResp) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
-	} else if err := req.Validate(); err != nil {
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
+	}
+	if err := req.Validate(); err != nil {
 		return err
 	}
 	/*
@@ -595,6 +630,7 @@ func (rpcConn *CryptServiceConn) AutoRetrieveKey(req AutoRetrieveKeyReq, resp *A
 
 // A request to forcibly retrieve encryption keys using a password.
 type ManualRetrieveKeyReq struct {
+	PlainPassword string // access to keys is granted only after the correct password is given.
 	Password HashedPassword // access to keys is granted only after the correct password is given.
 	UUIDs    []string       // (locked) file system UUIDs
 	Hostname string         // client's host name (for logging only)
@@ -608,8 +644,16 @@ type ManualRetrieveKeyResp struct {
 
 // Retrieve encryption keys using a password. All requested keys will be granted regardless of MaxActive restriction.
 func (rpcConn *CryptServiceConn) ManualRetrieveKey(req ManualRetrieveKeyReq, resp *ManualRetrieveKeyResp) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	// Retrieve the keys and write down who retrieved it
 	requester := keydb.AliveMessage{
@@ -654,14 +698,23 @@ func (rpcConn *CryptServiceConn) ReportAlive(req ReportAliveReq, rejectedUUIDs *
 
 // A request to erase an encryption key.
 type EraseKeyReq struct {
-	Password HashedPassword // access is granted only after the correct password is given
+	PlainPassword string         // access is granted only after the correct password is given
+	Password      HashedPassword // access is granted only after the correct password is given
 	Hostname string         // client's host name (for logging only)
 	UUID     string         // UUID of the disk to delete key for
 }
 
 func (rpcConn *CryptServiceConn) EraseKey(req EraseKeyReq, _ *DummyAttr) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	rec, found := rpcConn.Svc.KeyDB.GetByUUID(req.UUID)
 	if !found {
@@ -698,14 +751,23 @@ func (rpcConn *CryptServiceConn) GetSalt(_ DummyAttr, salt *PasswordSalt) error 
 
 // ReloadRecordReq instructs server to reload one record from disk into database.
 type ReloadRecordReq struct {
+	PlainPassword string    // Password is provided by client and validated to grant access to this function.
 	Password HashedPassword // Password is provided by client and validated to grant access to this function.
 	UUID     string         // UUID is the UUID of record to be reloaded.
 }
 
 // ReloadRecord causes exactly one database record to be reloaded from disk.
 func (rpcConn *CryptServiceConn) ReloadRecord(req ReloadRecordReq, _ *DummyAttr) error {
-	if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
-		return err
+	if req.PlainPassword != "" {
+		if err := rpcConn.Svc.ValidatePlainPassword(req.PlainPassword ); err != nil {
+			return err
+		}
+	} else if(rpcConn.Svc.Config.AllowHashAuth) {
+		if err := rpcConn.Svc.ValidatePassword(req.Password); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("No valid authentication method.")
 	}
 	if err := rpcConn.Svc.KeyDB.ReloadRecord(req.UUID); err != nil {
 		return err
