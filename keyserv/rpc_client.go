@@ -3,12 +3,12 @@
 package keyserv
 
 import (
+	"cryptctl/sys"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"net"
 	"net/rpc"

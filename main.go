@@ -1,12 +1,14 @@
+//go:build linux
 // +build linux
+
 // cryptctl - Copyright (c) 2017 SUSE Linux GmbH, Germany
 // This source code is licensed under GPL version 3 that can be found in LICENSE file.
 package main
 
 import (
+	"cryptctl/command"
+	"cryptctl/sys"
 	"fmt"
-	"github.com/SUSE/cryptctl/command"
-	"github.com/SUSE/cryptctl/sys"
 	"os"
 	"os/signal"
 	"runtime"
@@ -30,8 +32,7 @@ Maintain a key server:
 Encrypt/unlock file systems:
   cryptctl encrypt         Set up a new file system for encryption.
   cryptctl online-unlock   Forcibly unlock all file systems via key server.
-  cryptctl offline-unlock  Unlock a file system via a key record file.
-`)
+  cryptctl offline-unlock  Unlock a file system via a key record file.`)
 	os.Exit(exitStatus)
 }
 

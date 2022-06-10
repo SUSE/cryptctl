@@ -3,8 +3,8 @@
 package routine
 
 import (
+	"cryptctl/sys"
 	"fmt"
-	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"os"
 	"path"

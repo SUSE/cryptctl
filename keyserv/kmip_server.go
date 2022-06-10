@@ -3,15 +3,15 @@
 package keyserv
 
 import (
+	"cryptctl/keydb"
+	"cryptctl/kmip/structure"
+	"cryptctl/kmip/ttlv"
 	"crypto/rand"
 	"crypto/subtle"
 	"crypto/tls"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/keydb"
-	"github.com/SUSE/cryptctl/kmip/structure"
-	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"log"
 	"net"
 	"reflect"

@@ -3,8 +3,8 @@
 package keyserv
 
 import (
+	"cryptctl/keydb"
 	"encoding/hex"
-	"github.com/SUSE/cryptctl/keydb"
 	"io/ioutil"
 	"os"
 	"path"

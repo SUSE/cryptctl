@@ -3,12 +3,12 @@
 package routine
 
 import (
+	"cryptctl/fs"
+	"cryptctl/keyserv"
+	"cryptctl/sys"
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/fs"
-	"github.com/SUSE/cryptctl/keyserv"
-	"github.com/SUSE/cryptctl/sys"
 	"io"
 	"log"
 	"os"

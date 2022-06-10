@@ -5,7 +5,7 @@ package fs
 import (
 	"bytes"
 	"fmt"
-	"github.com/SUSE/cryptctl/sys"
+	"cryptctl/sys"
 	"os"
 	"os/exec"
 	"regexp"

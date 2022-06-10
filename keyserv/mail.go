@@ -3,9 +3,9 @@
 package keyserv
 
 import (
+	"cryptctl/sys"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/sys"
 	"net/smtp"
 	"strconv"
 	"strings"
