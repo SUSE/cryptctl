@@ -247,8 +247,7 @@ func EncryptFS(progressOut io.Writer, client *keyserv.CryptClient,
 			return "", fmt.Errorf(MSG_E_MKDIR, srcDir, err)
 		}
 	}
-	// From now on mount options will only be used to mount new encrypted file system, hence btrfs subvolume no longer makes sense.
-	srcDirMount.DiscardBtrfsSubvolume()
+
 	// Mount encrypted disk to srcDir and copy from newSrcDir to the now encrypted directory
 	if err := fs.Mount(path.Join("/dev/mapper", dmName), srcDirMount.FileSystem, srcDirMount.Options, srcDir); err != nil {
 		return "", err

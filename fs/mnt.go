@@ -16,6 +16,12 @@ import (
 
 var mountOptionSeparator = regexp.MustCompile("[[:space:]]*,[[:space:]]*") // split mount options by commas
 var consecutiveSpaces = regexp.MustCompile("[[:space:]]+")                 // split fields by consecutive spaces
+var equalsSign = regexp.MustCompile("=")                                   // split fields by eqals sign
+// Split mount options and ignore
+var ignoreMountOptions = map[string]bool{
+	"subvol":   true,
+	"subvolid": true,
+}
 
 // Represent a mount point entry in /etc/mtab.
 type MountPoint struct {
@@ -40,18 +46,6 @@ func (mount MountPoint) GetFileSystemSizeByte() (int64, error) {
 		return 0, err
 	}
 	return fs.Bsize * int64(fs.Blocks), nil
-}
-
-// Remove btrfs subvolume among mount options. The MountPoint is modified in-place.
-func (mount *MountPoint) DiscardBtrfsSubvolume() {
-	newOptions := make([]string, 0, len(mount.Options))
-	for _, opt := range mount.Options {
-		// Discard "subvolid=" and "subvol="
-		if !strings.HasPrefix(opt, "subvol") {
-			newOptions = append(newOptions, opt)
-		}
-	}
-	mount.Options = newOptions
 }
 
 // A list of mount points.
@@ -135,8 +129,15 @@ func ParseMountPoints(txt string) (mounts MountPoints) {
 			// rootfs most likely originates from btrfs and masks the real mount point of /
 			continue
 		}
-		// Split mount options
-		mountPoint.Options = mountOptionSeparator.Split(fields[3], -1)
+
+		mountPoint.Options = make([]string, 0)
+		for _, opt := range mountOptionSeparator.Split(fields[3], -1) {
+			if ignoreMountOptions[equalsSign.Split(opt, 2)[0]] {
+				continue
+			}
+			mountPoint.Options = append(mountPoint.Options, opt)
+		}
+
 		var err error
 		if mountPoint.Dump, err = strconv.Atoi(fields[4]); err != nil {
 			panic(fmt.Sprintf("ParseMountPoints: not an integer in '%s'", line))
