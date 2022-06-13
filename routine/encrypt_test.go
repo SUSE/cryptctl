@@ -4,12 +4,12 @@ package routine
 
 import (
 	"bytes"
+	"cryptctl/fs"
+	"cryptctl/keydb"
+	"cryptctl/keyserv"
+	"cryptctl/sys"
 	"encoding/hex"
 	"fmt"
-	"github.com/SUSE/cryptctl/fs"
-	"github.com/SUSE/cryptctl/keydb"
-	"github.com/SUSE/cryptctl/keyserv"
-	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"log"
 	"os"

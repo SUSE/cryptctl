@@ -3,13 +3,13 @@
 package command
 
 import (
+	"cryptctl/keydb"
+	"cryptctl/keyserv"
+	"cryptctl/routine"
+	"cryptctl/sys"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/keydb"
-	"github.com/SUSE/cryptctl/keyserv"
-	"github.com/SUSE/cryptctl/routine"
-	"github.com/SUSE/cryptctl/sys"
 	"io/ioutil"
 	"log"
 	"os"

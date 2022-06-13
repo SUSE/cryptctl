@@ -101,9 +101,9 @@ func BenchmarkManualRetrieveKey(b *testing.B) {
 	// The benchmark will run all RPC operations consecutively
 	for i := 0; i < b.N; i++ {
 		if resp, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-			PlainPassword:    TEST_RPC_PASS,
-			UUIDs:    []string{"aaa"},
-			Hostname: "localhost",
+			PlainPassword: TEST_RPC_PASS,
+			UUIDs:         []string{"aaa"},
+			Hostname:      "localhost",
 		}); err != nil || len(resp.Granted) != 1 {
 			b.Fatal(err, resp)
 		}
@@ -137,9 +137,9 @@ func BenchmarkReportAlive(b *testing.B) {
 	}
 	// Retrieve the key so that this computer becomes eligible to send alive messages
 	if resp, err := client.ManualRetrieveKey(ManualRetrieveKeyReq{
-		PlainPassword:    TEST_RPC_PASS,
-		UUIDs:    []string{"aaa"},
-		Hostname: "localhost",
+		PlainPassword: TEST_RPC_PASS,
+		UUIDs:         []string{"aaa"},
+		Hostname:      "localhost",
 	}); err != nil || len(resp.Granted) != 1 {
 		b.Fatal(err, resp)
 	}

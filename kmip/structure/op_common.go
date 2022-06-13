@@ -3,10 +3,10 @@
 package structure
 
 import (
+	"cryptctl/kmip/ttlv"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"reflect"
 )
 

@@ -4,8 +4,8 @@ package keyserv
 
 import (
 	"fmt"
-	"github.com/SUSE/cryptctl/keydb"
-	"github.com/SUSE/cryptctl/sys"
+	"cryptctl/keydb"
+	"cryptctl/sys"
 	"path"
 	"reflect"
 	"strconv"

@@ -4,13 +4,13 @@ package keyserv
 
 import (
 	"bytes"
+	"cryptctl/kmip/structure"
+	"cryptctl/kmip/ttlv"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/kmip/structure"
-	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"io"
 	"log"
 	"reflect"

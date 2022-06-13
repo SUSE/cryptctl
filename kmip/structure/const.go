@@ -3,8 +3,8 @@
 package structure
 
 import (
+	"cryptctl/kmip/ttlv"
 	"encoding/hex"
-	"github.com/SUSE/cryptctl/kmip/ttlv"
 	"log"
 )
 

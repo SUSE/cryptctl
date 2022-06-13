@@ -3,12 +3,12 @@
 package routine
 
 import (
+	"cryptctl/fs"
+	"cryptctl/keydb"
+	"cryptctl/keyserv"
+	"cryptctl/sys"
 	"errors"
 	"fmt"
-	"github.com/SUSE/cryptctl/fs"
-	"github.com/SUSE/cryptctl/keydb"
-	"github.com/SUSE/cryptctl/keyserv"
-	"github.com/SUSE/cryptctl/sys"
 	"io"
 	"os"
 	"path"
@@ -38,8 +38,8 @@ func ManOnlineUnlockFS(progressOut io.Writer, client *keyserv.CryptClient, passw
 	}
 	hostname, _ := sys.GetHostnameAndIP()
 	resp, err := client.ManualRetrieveKey(keyserv.ManualRetrieveKeyReq{
-		UUIDs:    reqUUIDs,
-		Hostname: hostname,
+		UUIDs:         reqUUIDs,
+		Hostname:      hostname,
 		PlainPassword: password,
 	})
 	if err != nil {
@@ -263,8 +263,8 @@ func EraseKey(progressOut io.Writer, client *keyserv.CryptClient, password, uuid
 	hostname, _ := sys.GetHostnameAndIP()
 	if err := client.EraseKey(keyserv.EraseKeyReq{
 		PlainPassword: password,
-		Hostname: hostname,
-		UUID: uuid}); err != nil {
+		Hostname:      hostname,
+		UUID:          uuid}); err != nil {
 		return err
 	}
 	fmt.Fprintf(progressOut, "Encryption header has been wiped successfully, data in \"%s\" (%s) is now irreversibly lost.\n",
