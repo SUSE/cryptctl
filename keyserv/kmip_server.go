@@ -44,7 +44,7 @@ type KMIPServer struct {
 	PasswordChallenge []byte       // a random hex-encoded string secret that must be presented by KMIP client as authentication password
 }
 
-func NewKMIPServer(db *keydb.DB, certFilePath, certKeyPath string) (*KMIPServer, error) {
+func NewKMIPServer(db *keydb.DB, certFilePath, certKeyPath string, tlsMinVersion uint16) (*KMIPServer, error) {
 	server := &KMIPServer{
 		DB:        db,
 		TLSConfig: new(tls.Config),
@@ -54,6 +54,7 @@ func NewKMIPServer(db *keydb.DB, certFilePath, certKeyPath string) (*KMIPServer,
 		return nil, fmt.Errorf("NewKMIPClient: failed to load client certificate/key - %v", err)
 	}
 	server.TLSConfig.Certificates = []tls.Certificate{serverID}
+	server.TLSConfig.MinVersion = tlsMinVersion
 	return server, nil
 }
 

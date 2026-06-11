@@ -37,6 +37,7 @@ const (
 	SRV_CONF_TLS_CERT            = "TLS_CERT_PEM"
 	SRV_CONF_TLS_KEY             = "TLS_CERT_KEY_PEM"
 	SRV_CONF_TLS_VALIDATE_CLIENT = "TLS_VALIDATE_CLIENT"
+	SRV_CONF_TLS_MIN_VERSION     = "TLS_MIN_VERSION"
 	SRV_CONF_LISTEN_ADDR         = "LISTEN_ADDRESS"
 	SRV_CONF_LISTEN_PORT         = "LISTEN_PORT"
 	SRV_CONF_KEYDB_DIR           = "KEY_DB_DIR"
@@ -101,6 +102,7 @@ type CryptServiceConfig struct {
 	KeyPEM               string              // path to PEM-encoded TLS certificate key
 	Address              string              // address of the network interface to listen on
 	Port                 int                 // port to listen on
+	TlsMinVersion        uint16              // Minimum TLS Version
 	KeyDBDir             string              // key database directory
 	KeyCreationSubject   string              // subject of the notification email sent by key creation request
 	KeyCreationGreeting  string              // greeting of the notification email sent by key creation request
@@ -167,6 +169,24 @@ func (conf *CryptServiceConfig) ReadFromSysconfig(sysconf *sys.Sysconfig) error 
 	conf.KMIPTLSDoVerify = sysconf.GetBool(SRV_CONF_KMIP_TLS_DO_VERIFY, true)
 	conf.KMIPCertPEM = sysconf.GetString(SRV_CONF_KMIP_SERVER_TLS_CERT, "")
 	conf.KMIPKeyPEM = sysconf.GetString(SRV_CONF_KMIP_SERVER_TLS_KEY, "")
+
+	switch sysconf.GetString(SRV_CONF_TLS_MIN_VERSION, "tls-1.2") {
+	case "TLS-1.0":
+	case "tls-1.0":
+		conf.TlsMinVersion = tls.VersionTLS10
+	case "TLS-1.1":
+	case "tls-1.1":
+		conf.TlsMinVersion = tls.VersionTLS11
+	case "TLS-1.2":
+	case "tls-1.2":
+		conf.TlsMinVersion = tls.VersionTLS12
+	case "TLS-1.3":
+	case "tls-1.3":
+		conf.TlsMinVersion = tls.VersionTLS13
+	default:
+		conf.TlsMinVersion = tls.VersionTLS12
+	}
+
 	return conf.Validate()
 }
 
@@ -197,6 +217,8 @@ func NewCryptServer(config CryptServiceConfig, mailer Mailer) (srv *CryptServer,
 	if err != nil {
 		return nil, err
 	}
+
+	srv.TLSConfig.MinVersion = config.TlsMinVersion
 	/*
 	 The author of TLS related libraries in Go has an opinion about CRL
 	*/
@@ -231,7 +253,7 @@ func (srv *CryptServer) ListenTCP() error {
 	var err error
 	if len(srv.Config.KMIPAddresses) == 0 {
 		// If RPC server settings do not have KMIP connectivity settings, start my own KMIP server.
-		if srv.BuiltInKMIPServer, err = NewKMIPServer(srv.KeyDB, srv.Config.CertPEM, srv.Config.KeyPEM); err != nil {
+		if srv.BuiltInKMIPServer, err = NewKMIPServer(srv.KeyDB, srv.Config.CertPEM, srv.Config.KeyPEM, srv.Config.TlsMinVersion); err != nil {
 			return err
 		}
 		if err := srv.BuiltInKMIPServer.Listen(); err != nil {

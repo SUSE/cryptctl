@@ -240,6 +240,11 @@ Important notes for client computers:
 		"Key database directory"); keyDBDir != "" {
 		sysconf.Set(keyserv.SRV_CONF_KEYDB_DIR, keyDBDir)
 	}
+	if tlsMinVersion := sys.Input(false,
+		sysconf.GetString(keyserv.SRV_CONF_TLS_MIN_VERSION, "tls-1.2"),
+		"minimum TLS version to use"); tlsMinVersion != "" {
+		sysconf.Set(keyserv.SRV_CONF_TLS_MIN_VERSION, tlsMinVersion)
+	}
 	// Walk through client certificate verification settings
 	validateClient := sys.InputBool(sysconf.GetString(keyserv.SRV_CONF_TLS_CA, "") != "",
 		"Should clients present their certificate in order to access this server?")

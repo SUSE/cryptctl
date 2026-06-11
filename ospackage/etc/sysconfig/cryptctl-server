@@ -42,6 +42,16 @@ TLS_CERT_KEY_PEM=""
 TLS_VALIDATE_CLIENT="no"
 
 ## Type:    string
+## Default: tls-1.2
+#
+# TLS minimum version
+# tls-1.0 (Considered insecure and deprecated)
+# tls-1.1 (Considered insecure and deprecated)
+# tls-1.2 (Default, widely used)
+# tls-1.3 (Most secure)
+TLS_MIN_VERSION="tls-1.2"
+
+## Type:    string
 ## Default: "0.0.0.0"
 #
 # Address of the network interface to listen on for incoming key requests.

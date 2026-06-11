@@ -4,6 +4,7 @@ package keyserv
 
 import (
 	"encoding/hex"
+	"crypto/tls"
 	"github.com/SUSE/cryptctl/keydb"
 	"io/ioutil"
 	"os"
@@ -27,7 +28,7 @@ func TestKMIP(t *testing.T) {
 
 	var server *KMIPServer
 	var serverHasShutdown bool
-	server, err = NewKMIPServer(db, path.Join(PkgInGopath, "keyserv", "rpc_test.crt"), path.Join(PkgInGopath, "keyserv", "rpc_test.key"))
+	server, err = NewKMIPServer(db, path.Join(PkgInGopath, "keyserv", "rpc_test.crt"), path.Join(PkgInGopath, "keyserv", "rpc_test.key"), tls.VersionTLS12)
 	if err != nil {
 		t.Fatal(err)
 	}
